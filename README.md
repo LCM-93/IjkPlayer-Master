@@ -1,3 +1,3 @@
 # IjkPlayer-Master
 
-自己编译的一个IjkPlayer 以备需要
+自己编译的一个IjkPlayer 以备不时之需
