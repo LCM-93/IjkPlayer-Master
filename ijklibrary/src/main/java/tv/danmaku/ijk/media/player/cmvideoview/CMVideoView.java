@@ -41,6 +41,8 @@ public class CMVideoView extends RelativeLayout implements CMVideoControl, View.
     private boolean isPrepared = false;
     private boolean isCompleted = false;
 
+    private int videoState = CMVideoViewState.VIDEO_STOP;
+
     public CMVideoView(Context context) {
         this(context, null);
     }
@@ -95,32 +97,54 @@ public class CMVideoView extends RelativeLayout implements CMVideoControl, View.
 
 
         } else if (v.getId() == R.id.iv_start) {
-            if (isPrepared && !isCompleted) {
+            if (videoState == CMVideoViewState.VIDEO_STOP) {
+                Log.e(TAG, "need init");
+            } else if (videoState == CMVideoViewState.VIDEO_PREPARED || videoState == CMVideoViewState.VIDEO_PAUSE || videoState == CMVideoViewState.VIDEO_COMPLETE) {
                 start();
+            } else if (videoState == CMVideoViewState.VIDEO_PLAYING) {
+                pause();
+            } else if (videoState == CMVideoViewState.VIDEO_ERROR) {
+                Log.e(TAG, "video error");
             }
         }
     }
 
     @Override
     public boolean onError(IMediaPlayer mp, int what, int extra) {
+        videoState = CMVideoViewState.VIDEO_ERROR;
+        ivStart.setImageResource(R.drawable.cm_slt_click_error);
         return false;
+
     }
 
     @Override
     public void onCompletion(IMediaPlayer mp) {
-        isCompleted = true;
-        Log.i(TAG,"onCompletion");
+        videoState = CMVideoViewState.VIDEO_COMPLETE;
+        Log.i(TAG, "onCompletion");
     }
 
     @Override
     public void onPrepared(IMediaPlayer mp) {
-        isPrepared = true;
-        Log.i(TAG,"onPrepared");
+        videoState = CMVideoViewState.VIDEO_PREPARED;
+        Log.i(TAG, "onPrepared");
     }
 
     @Override
     public boolean onInfo(IMediaPlayer mp, int what, int extra) {
-        Log.i(TAG,"onInfo");
+        Log.i(TAG, "onInfo");
+        switch (what) {
+            case IMediaPlayer.MEDIA_INFO_BUFFERING_START:
+                loading.setVisibility(VISIBLE);
+                break;
+
+            case IMediaPlayer.MEDIA_INFO_BUFFERING_END:
+                loading.setVisibility(GONE);
+                break;
+
+            case IMediaPlayer.MEDIA_INFO_AUDIO_RENDERING_START:
+                loading.setVisibility(GONE);
+                break;
+        }
         return false;
     }
 
@@ -138,16 +162,21 @@ public class CMVideoView extends RelativeLayout implements CMVideoControl, View.
     @Override
     public void start() {
         ijkVideoView.start();
+        videoState = CMVideoViewState.VIDEO_PLAYING;
+        ivStart.setImageResource(R.drawable.cm_slt_click_pause);
     }
 
     @Override
     public void pause() {
         ijkVideoView.pause();
+        videoState = CMVideoViewState.VIDEO_PAUSE;
+        ivStart.setImageResource(R.drawable.cm_slt_click_play);
     }
 
     @Override
     public void stop() {
         ijkVideoView.pause();
+
     }
 
     @Override
