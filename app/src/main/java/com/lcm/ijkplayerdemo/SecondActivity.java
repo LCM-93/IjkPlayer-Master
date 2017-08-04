@@ -26,4 +26,10 @@ public class SecondActivity extends AppCompatActivity {
 
         cmVideoView.initPath(url);
     }
+
+    @Override
+    protected void onDestroy() {
+        cmVideoView.release();
+        super.onDestroy();
+    }
 }

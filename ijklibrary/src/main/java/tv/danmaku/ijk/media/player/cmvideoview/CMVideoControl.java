@@ -22,7 +22,7 @@ public interface CMVideoControl {
 
     void stop();
 
-    void relase();
+    void release();
 
 
 }
